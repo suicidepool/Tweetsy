@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -22,6 +24,15 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    val localProperties = Properties()
+    val localPropertiesFile = File(rootDir, "secret.properties")
+
+    if(localPropertiesFile.exists() && localPropertiesFile.isFile){
+        localPropertiesFile.inputStream().use {
+            localProperties.load(it)
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -29,6 +40,13 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            buildConfigField("String", "MASTER_KEY", localProperties.getProperty("MASTER_KEY"))
+            buildConfigField("String", "ACCESS_KEY", localProperties.getProperty("ACCESS_KEY"))
+        }
+
+        debug {
+            buildConfigField("String", "MASTER_KEY", localProperties.getProperty("MASTER_KEY"))
+            buildConfigField("String", "ACCESS_KEY", localProperties.getProperty("ACCESS_KEY"))
         }
     }
     compileOptions {
@@ -40,6 +58,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 
